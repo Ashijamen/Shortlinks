@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  # postgres:
+  #   container_name: shortlinks_api_postgres
+  #   image: shortlinks_api_postgres
+  #   ports:
+  #     - 5432:5432
+  #   networks:
+  #     - main
+
+  cassandra:
+    container_name: shortlinks_api_cassandra
+    image: cassandra:latest
+    ports:
+      - 9042:9042
+    networks:
+      - main
+    environment:
+      CASSANDRA_LOCAL_DC: datacenter1
+      CASSANDRA_DC: datacenter1
+
+  apiRead:
+    container_name: shortlinks_api_read
+    image: shortlinks_api_read
+    ports:
+      - 5001:6001
+    depends_on:
+      - cassandra
+    restart: always
+    networks:
+      - main
+
+  apiWrite:
+    container_name: shortlinks_api_write
+    image: shortlinks_api_write
+    ports:
+      - 5002:6002
+    depends_on:
+      - cassandra
+    restart: always
+    networks:
+      - main
+
+networks:
+  main:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.10.0/24

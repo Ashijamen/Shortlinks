@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Short Links</title>
+</head>
+<body>
+<div class="container">
+    <h2>ShortURL v1.0</h2>
+    <form id="urlForm">
+        <label for="urlInput">Wpisz adres URL:</label>
+        <input type="text" id="urlInput" name="urlInput" required>
+        <button type="submit">Wyślij</button>
+    </form>
+    <div id="result"></div>
+</div>
+    <script>
+        document.getElementById("urlForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const url = document.getElementById("urlInput").value;
+
+             const urlPattern = /^(http|https):\/\/[^ "]+$/;
+             if (!urlPattern.test(url)) {
+                 document.getElementById("result").innerText = "Podany adres URL jest niepoprawny.";
+                 return;
+             }
+
+            fetch('http://localhost:8001/link/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ link: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+
+               const resultElement = document.getElementById("result");
+               resultElement.innerHTML = `<a href="${data.link}" target="_blank">${data.link}</a>`;
+               resultElement.classList.add("active");
+            })
+            .catch(error => {
+                console.error('Błąd:', error);
+                document.getElementById("result").innerText = "Wystąpił błąd podczas przetwarzania żądania.";
+            });
+        });
+
+        document.getElementById("urlForm").addEventListener("click", function(event) {
+            this.classList.add("expanded");
+        });
+    </script>
+</body>
+</html>
